@@ -1,7 +1,7 @@
 {
-  "name": "react",
+  "name": "newsletterguide",
   "version": "1.0.0",
-  "description": "",
+  "description": "discover the best of substack",
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {
