@@ -131,7 +131,7 @@ const LandingPage = () => {
       features: [
         "Access to weekly recommendations",
         "Save newsletters for later",
-        "Limited personalization (5 interest categories)",
+        "Limited personalization (3 interest categories)",
       ],
       color: "primary",
       popular: false,
