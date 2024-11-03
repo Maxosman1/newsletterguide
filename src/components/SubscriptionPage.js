@@ -49,8 +49,8 @@ const SubscriptionPage = () => {
     {
       id: "premium",
       name: "Premium",
-      monthlyPrice: 9.99,
-      yearlyPrice: 99,
+      monthlyPrice: 4,
+      yearlyPrice: 48,
       description: "Enhanced features for the dedicated newsletter enthusiast",
       features: [
         "All Basic features",
@@ -68,8 +68,8 @@ const SubscriptionPage = () => {
     {
       id: "pro",
       name: "Pro",
-      monthlyPrice: 29.99,
-      yearlyPrice: 299,
+      monthlyPrice: 12,
+      yearlyPrice: 99,
       description: "Ultimate package for power users and creators",
       features: [
         "All Premium features",

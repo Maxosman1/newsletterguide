@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
 import {
   Card,
   CardHeader,
@@ -12,16 +13,21 @@ import {
   FormControl,
   Select,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
-import { UploadFile, CardGiftcard } from "@mui/icons-material"; // Corrected Icons
+import { UploadFile, CardGiftcard } from "@mui/icons-material";
 
 const SubstackSubmit = () => {
-  const [singleSubstack, setSingleSubstack] = useState("");
-  const [singleCategory, setSingleCategory] = useState("");
+  const [singleSubstack, setSingleSubstack] = useState({
+    url: "",
+    title: "",
+    category: "",
+  });
   const [file, setFile] = useState(null);
   const [bulkCategory, setBulkCategory] = useState("");
-  const [singleSuccess, setSingleSuccess] = useState(false);
-  const [bulkSuccess, setBulkSuccess] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   const categories = [
     "Finance",
@@ -38,30 +44,115 @@ const SubstackSubmit = () => {
     "N/A",
   ];
 
-  const handleSingleSubmit = (e) => {
+  // Fetch user on component mount
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        setUser(userData);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleSingleSubmit = async (e) => {
     e.preventDefault();
-    setSingleSuccess(true);
-    setTimeout(() => setSingleSuccess(false), 3000);
-    setSingleSubstack("");
-    setSingleCategory("");
+    setIsLoading(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const { error } = await supabase.from("substacks").insert([
+        {
+          title: singleSubstack.title,
+          url: singleSubstack.url,
+          category: singleSubstack.category,
+        },
+      ]);
+
+      if (error) throw error;
+
+      setStatus({
+        type: "success",
+        message: "Your Substack has been successfully submitted!",
+      });
+      setSingleSubstack({ url: "", title: "", category: "" });
+
+      setTimeout(() => setStatus({ type: "", message: "" }), 3000);
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: "Error submitting Substack: " + error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleBulkSubmit = (e) => {
+  const handleBulkSubmit = async (e) => {
     e.preventDefault();
-    setBulkSuccess(true);
-    setTimeout(() => setBulkSuccess(false), 3000);
-    setFile(null);
-    setBulkCategory("");
+    if (!file || !user) return;
+    setIsLoading(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      // 1. Upload CSV to Supabase Storage
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data: fileData, error: uploadError } = await supabase.storage
+        .from("CSVS")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Update user's subscription status to premium
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          subscription_status: "premium",
+        })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setStatus({
+        type: "success",
+        message:
+          "Database submitted successfully! Your account has been upgraded to premium.",
+      });
+      setFile(null);
+      setBulkCategory("");
+
+      // Update local user state
+      setUser({
+        ...user,
+        subscription_status: "premium",
+      });
+
+      setTimeout(() => setStatus({ type: "", message: "" }), 3000);
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: "Error processing submission: " + error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-8">
+    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem" }}>
       <Typography variant="h3" align="center" gutterBottom>
         Submit Your Substack
       </Typography>
 
       {/* Single Submission Card */}
-      <Card>
+      <Card sx={{ mb: 4 }}>
         <CardHeader
           title="Submit Individual Substack"
           subheader="Share your favorite Substack with the community"
@@ -70,20 +161,44 @@ const SubstackSubmit = () => {
           <form onSubmit={handleSingleSubmit}>
             <TextField
               fullWidth
+              label="Substack Title"
+              value={singleSubstack.title}
+              onChange={(e) =>
+                setSingleSubstack({
+                  ...singleSubstack,
+                  title: e.target.value,
+                })
+              }
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
               label="Substack URL"
               type="url"
               placeholder="https://yoursubstack.substack.com"
-              value={singleSubstack}
-              onChange={(e) => setSingleSubstack(e.target.value)}
+              value={singleSubstack.url}
+              onChange={(e) =>
+                setSingleSubstack({
+                  ...singleSubstack,
+                  url: e.target.value,
+                })
+              }
               required
               margin="normal"
             />
             <FormControl fullWidth margin="normal">
               <InputLabel>Category</InputLabel>
               <Select
-                value={singleCategory}
-                onChange={(e) => setSingleCategory(e.target.value)}
+                value={singleSubstack.category}
+                onChange={(e) =>
+                  setSingleSubstack({
+                    ...singleSubstack,
+                    category: e.target.value,
+                  })
+                }
                 label="Category"
+                required
               >
                 {categories.map((category) => (
                   <MenuItem key={category} value={category.toLowerCase()}>
@@ -93,16 +208,17 @@ const SubstackSubmit = () => {
               </Select>
             </FormControl>
             <CardActions>
-              <Button variant="contained" type="submit" fullWidth>
-                Submit Substack
+              <Button
+                variant="contained"
+                type="submit"
+                fullWidth
+                disabled={isLoading}
+                startIcon={isLoading ? <CircularProgress size={20} /> : null}
+              >
+                {isLoading ? "Submitting..." : "Submit Substack"}
               </Button>
             </CardActions>
           </form>
-          {singleSuccess && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              Your Substack has been successfully submitted!
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
@@ -118,8 +234,7 @@ const SubstackSubmit = () => {
           subheader={
             <>
               <Typography variant="subtitle1" color="purple">
-                Special Offer: Get a 2-month Free Subscription when you submit
-                your database!
+                Special Offer: Get Premium Status when you submit your database!
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 Share your collection of Substacks and get rewarded. Submit a
@@ -173,7 +288,9 @@ const SubstackSubmit = () => {
               CSV Format Guidelines:
             </Typography>
             <ul>
-              <li>Include columns for "url" and optionally "category"</li>
+              <li>
+                Include columns for "url", "title", and optionally "category"
+              </li>
               <li>Categories can be any of the listed categories above</li>
               <li>URLs should be complete Substack addresses</li>
             </ul>
@@ -183,17 +300,17 @@ const SubstackSubmit = () => {
                 variant="contained"
                 type="submit"
                 fullWidth
-                disabled={!file}
+                disabled={!file || isLoading || !user}
+                startIcon={isLoading ? <CircularProgress size={20} /> : null}
               >
-                Submit Database
+                {isLoading ? "Processing..." : "Submit Database"}
               </Button>
             </CardActions>
           </form>
 
-          {bulkSuccess && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              Your database has been successfully submitted! We'll review your
-              submission and activate your 2-month free subscription soon.
+          {status.message && (
+            <Alert severity={status.type} sx={{ mt: 2 }}>
+              {status.message}
             </Alert>
           )}
         </CardContent>

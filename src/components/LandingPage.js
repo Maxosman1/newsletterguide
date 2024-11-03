@@ -138,8 +138,8 @@ const LandingPage = () => {
     },
     {
       name: "Premium Subscription",
-      monthlyPrice: 9.99,
-      yearlyPrice: 99,
+      monthlyPrice: 4,
+      yearlyPrice: 48,
       features: [
         "Daily and weekly recommendations",
         "Advanced personalization",
@@ -151,8 +151,8 @@ const LandingPage = () => {
     },
     {
       name: "Gold/Pro Subscription",
-      monthlyPrice: 29.99,
-      yearlyPrice: 299,
+      monthlyPrice: 12,
+      yearlyPrice: 99,
       features: [
         "All Premium features",
         "Gold-tier newsletter placement",

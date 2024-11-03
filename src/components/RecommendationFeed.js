@@ -1,342 +1,256 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { fetchNewsletters } from "../services/rssService";
+import DigestView from "./DigestView";
 import {
-  Avatar,
+  Container,
+  Typography,
   Button,
+  Grid,
   Card,
   CardContent,
-  CardHeader,
   CardMedia,
-  Tabs,
-  Tab,
   CircularProgress,
+  Snackbar,
   Box,
-  Typography,
-  styled,
-  Skeleton,
-  IconButton,
   Collapse,
+  IconButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import StarIcon from "@mui/icons-material/Star";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import { supabase } from "../supabaseClient";
-
-const StyledTabs = styled(Tabs)(({ theme }) => ({
-  marginBottom: theme.spacing(3),
-  "& .MuiTabs-flexContainer": {
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  "& .MuiTab-root": {
-    fontSize: "1.1rem",
-    padding: "16px 32px",
-    minHeight: 64,
-    fontWeight: 600,
-    minWidth: "auto",
-    flex: 1,
-  },
-}));
-
-const SubscriptionBanner = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  padding: theme.spacing(2),
-  marginBottom: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  boxShadow: theme.shadows[1],
-}));
-
-const NewsletterSkeleton = () => (
-  <Card variant="outlined" sx={{ mb: 2 }}>
-    <CardHeader
-      avatar={<Skeleton variant="circular" width={40} height={40} />}
-      title={<Skeleton variant="text" width="60%" />}
-      subheader={<Skeleton variant="text" width="40%" />}
-    />
-    <Skeleton variant="rectangular" height={140} />
-    <CardContent>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Skeleton variant="text" width="30%" />
-        <Skeleton variant="rounded" width={100} height={36} />
-      </Box>
-      <Skeleton variant="text" count={3} />
-    </CardContent>
-  </Card>
-);
-
-const EmptyState = ({ message, icon }) => (
-  <Box
-    sx={{
-      textAlign: "center",
-      py: 8,
-      px: 2,
-      bgcolor: "background.paper",
-      borderRadius: 1,
-      boxShadow: 1,
-    }}
-  >
-    {icon}
-    <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-      {message}
-    </Typography>
-  </Box>
-);
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 const RecommendationFeed = () => {
-  const navigate = useNavigate();
-  const [savedItems, setSavedItems] = useState(new Set());
-  const [feedback, setFeedback] = useState({});
-  const [activeTab, setActiveTab] = useState(0);
-  const [subscriptionTier, setSubscriptionTier] = useState("free");
-  const [interests, setInterests] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [totalNewsletters, setTotalNewsletters] = useState(0);
-  const [error, setError] = useState(null);
-  const [expandedCard, setExpandedCard] = useState(null);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [newsletters, setNewsletters] = useState([]);
+  const [digest, setDigest] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [viewType, setViewType] = useState("grid");
+  const [showArticles, setShowArticles] = useState(false);
 
-  // Fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        console.error("User not logged in");
-        return;
-      }
-
-      const { data: userData, error } = await supabase
-        .from("users")
-        .select("subscription_status, interests")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching user data:", error.message);
-      } else {
-        setSubscriptionTier(userData.subscription_status);
-        setInterests(userData.interests || []);
-        setActiveTab(0);
+    const loadNewsletters = async () => {
+      setLoading(true);
+      try {
+        const { newsletters: fetchedNewsletters, digest: fetchedDigest } =
+          await fetchNewsletters();
+        setNewsletters(fetchedNewsletters || []);
+        setDigest(fetchedDigest || "");
+      } catch (err) {
+        console.error("Failed to load newsletters:", err);
+        setError("Failed to load newsletters. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchUserData();
+
+    loadNewsletters();
   }, []);
 
-  // Fetch recommendations based on active interest
-  const fetchRecommendations = async () => {
-    setLoading(true);
-    setError(null);
-    const selectedInterest = interests[activeTab];
-    const limit = subscriptionTier.toLowerCase() === "free" ? 5 : 15;
+  const handleCloseSnackbar = () => {
+    setError("");
+  };
 
-    if (selectedInterest) {
-      try {
-        const { count } = await supabase
-          .from("substack_newsletters")
-          .select("id", { count: "exact" })
-          .ilike("interests", `%${selectedInterest}%`);
-
-        setTotalNewsletters(count || 0);
-
-        const { data, error } = await supabase
-          .from("substack_newsletters")
-          .select("*")
-          .ilike("interests", `%${selectedInterest}%`)
-          .limit(limit);
-
-        if (error) throw new Error(error.message);
-
-        const shuffled = data.sort(() => 0.5 - Math.random());
-        setRecommendations(shuffled);
-      } catch (err) {
-        console.error("Error fetching newsletters:", err.message);
-        setError(err);
-      }
-    } else {
-      setRecommendations([]);
-      setTotalNewsletters(0);
+  const getArticleImage = (article) => {
+    if (article.enclosure?.url) {
+      return article.enclosure.url;
     }
 
-    setLoading(false);
+    const imgRegex = /<img[^>]+src="([^">]+)"/;
+    if (article.content) {
+      const match = article.content.match(imgRegex);
+      return match ? match[1] : null;
+    }
+
+    return null;
   };
 
-  useEffect(() => {
-    if (interests.length > 0) fetchRecommendations();
-  }, [activeTab, interests, subscriptionTier]);
-
-  const toggleSave = (id) => {
-    setSavedItems((prev) => {
-      const newSavedItems = new Set(prev);
-      newSavedItems.has(id) ? newSavedItems.delete(id) : newSavedItems.add(id);
-      return newSavedItems;
-    });
-  };
-
-  const giveFeedback = (id, type) => {
-    setFeedback((prev) => ({ ...prev, [id]: type }));
-  };
-
-  const handleSubscribe = () => {
-    navigate("/subscription");
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.pageYOffset > 300);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const NewsletterCard = ({ item }) => (
-    <Card
-      variant="outlined"
-      sx={{
-        mb: 2,
-        cursor: "pointer",
-        transition: "transform 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-        },
-      }}
-      onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
-    >
-      <CardHeader
-        title={item.title}
-        subheader={
-          <Typography variant="body2" color="text.secondary">
-            {item.interests}
-          </Typography>
-        }
-      />
-      <CardMedia
-        component="img"
-        height="140"
-        image={item.image_url || "/api/placeholder/400/200"}
-        alt={item.title}
-      />
-      <CardContent>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar alt={item.author} src="/api/placeholder/32/32" />
-            <Typography variant="subtitle2">{item.author}</Typography>
-          </Box>
-          <Button variant="outlined" onClick={() => toggleSave(item.id)}>
-            {savedItems.has(item.id) ? "Saved" : "Save"}
-          </Button>
-        </Box>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {item.read_time} · {item.subscribers.toLocaleString()} subscribers
-        </Typography>
-
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          {item.excerpt}
-        </Typography>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              onClick={() => giveFeedback(item.id, "like")}
-              variant="outlined"
-              color="success"
-              size="small"
-              startIcon={<StarIcon />}
-            >
-              Like
-            </Button>
-            <Button
-              onClick={() => giveFeedback(item.id, "dislike")}
-              variant="outlined"
-              color="error"
-              size="small"
-            >
-              Dislike
-            </Button>
-          </Box>
-          {feedback[item.id] && (
-            <Typography variant="body2" color="text.secondary">
-              {feedback[item.id] === "like"
-                ? "Thanks for liking!"
-                : "Sorry to hear that!"}
-            </Typography>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
-  );
+  if (loading) {
+    return (
+      <Container
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "200px",
+        }}
+      >
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <SubscriptionBanner>
-        <Typography variant="h6">
-          {subscriptionTier === "free"
-            ? "Subscribe to see more recommendations"
-            : "Premium User"}
-        </Typography>
-        <Button variant="contained" onClick={handleSubscribe}>
-          {subscriptionTier === "free" ? "Subscribe" : "Manage Subscription"}
-        </Button>
-      </SubscriptionBanner>
+    <Container>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, my: 3 }}>
+        Your Daily Newsletter Digest
+      </Typography>
 
-      <StyledTabs
-        value={activeTab}
-        onChange={(e, newValue) => setActiveTab(newValue)}
+      {digest && <DigestView digest={digest} />}
+
+      {/* Toggle Button for Articles */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          my: 4,
+          borderTop: "1px solid #eaeaea",
+          pt: 4,
+        }}
       >
-        {interests.map((interest, index) => (
-          <Tab key={index} label={interest} />
-        ))}
-      </StyledTabs>
-
-      {loading ? (
-        <Box>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <EmptyState
-          message="Error loading recommendations. Please try again later."
-          icon={<ArrowUpwardIcon />}
-        />
-      ) : recommendations.length === 0 ? (
-        <EmptyState
-          message="No recommendations found for this interest."
-          icon={<ArrowUpwardIcon />}
-        />
-      ) : (
-        recommendations.map((item) => (
-          <NewsletterCard key={item.id} item={item} />
-        ))
-      )}
-
-      {showBackToTop && (
         <Button
-          variant="contained"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          sx={{ position: "fixed", bottom: 16, right: 16 }}
+          variant="outlined"
+          onClick={() => setShowArticles(!showArticles)}
+          endIcon={
+            showArticles ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
+          }
+          sx={{
+            borderRadius: "20px",
+            px: 3,
+            py: 1,
+            textTransform: "none",
+            fontSize: "1rem",
+          }}
         >
-          Back to Top
+          {showArticles ? "Hide Full Articles" : "Show Full Articles"}
         </Button>
-      )}
-    </Box>
+      </Box>
+
+      {/* Collapsible Articles Section */}
+      <Collapse in={showArticles}>
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              Full Articles
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => setViewType(viewType === "grid" ? "list" : "grid")}
+              size="small"
+            >
+              {viewType === "grid" ? "List View" : "Grid View"}
+            </Button>
+          </Box>
+
+          {Array.isArray(newsletters) && newsletters.length === 0 ? (
+            <Typography>No newsletters available.</Typography>
+          ) : (
+            <Grid container spacing={3}>
+              {newsletters.map((newsletter) => (
+                <Grid item xs={12} sm={6} md={4} key={newsletter.id}>
+                  <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {newsletter.feedImage && (
+                      <CardMedia
+                        component="img"
+                        alt={`${newsletter.title} logo`}
+                        height="140"
+                        image={newsletter.feedImage}
+                        sx={{ objectFit: "cover" }}
+                      />
+                    )}
+                    <CardContent>
+                      <Typography
+                        variant="h5"
+                        component="div"
+                        sx={{
+                          fontWeight: 700,
+                          mb: 2,
+                          color: "#1a1a1a",
+                        }}
+                      >
+                        {newsletter.title}
+                        <Typography
+                          component="span"
+                          color="text.secondary"
+                          sx={{ ml: 1 }}
+                        >
+                          ({newsletter.category})
+                        </Typography>
+                      </Typography>
+
+                      {newsletter.articles.length === 0 ? (
+                        <Typography>
+                          No articles available for this newsletter.
+                        </Typography>
+                      ) : (
+                        newsletter.articles.map((article) => (
+                          <Box key={article.link} sx={{ mb: 4 }}>
+                            {getArticleImage(article) && (
+                              <CardMedia
+                                component="img"
+                                height="200"
+                                image={getArticleImage(article)}
+                                alt={article.title}
+                                sx={{
+                                  borderRadius: 1,
+                                  mb: 2,
+                                }}
+                              />
+                            )}
+                            <Typography
+                              variant="h6"
+                              component="h3"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: "1.1rem",
+                                lineHeight: 1.3,
+                                mb: 1,
+                                color: "#1a1a1a",
+                              }}
+                            >
+                              {article.title}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                mb: 1,
+                                color: "#2c2c2c",
+                                lineHeight: 1.6,
+                              }}
+                            >
+                              {article.description}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              sx={{ mb: 1 }}
+                            >
+                              By {article.author || "Unknown"}
+                            </Typography>
+                            <Button
+                              href={article.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              variant="outlined"
+                              size="small"
+                              sx={{ mt: 1 }}
+                            >
+                              Read more
+                            </Button>
+                          </Box>
+                        ))
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
+      </Collapse>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={error}
+      />
+    </Container>
   );
 };
 
