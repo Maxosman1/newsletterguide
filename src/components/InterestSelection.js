@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  AppBar,
+  Toolbar,
+  Paper
+} from '@mui/material';
+import {
+  Mic,
   Laptop,
-  LineChart,
+  TrendingUp,
   Heart,
   Palette,
   Music,
@@ -12,222 +24,200 @@ import {
   Utensils,
   Brain,
   Dumbbell,
-  Check,
-} from "lucide-react";
-import {
-  Box,
-  Button,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  IconButton,
-} from "@mui/material";
-import AccountCreation from "./AccountCreation"; // Import AccountCreation component
+  Radio,
+  Headphones,
+  Film,
+  Award,
+  Podcast,
+  Gamepad,
+  Users,
+  History,
+  Comedy
+} from 'lucide-react';
 
-const InterestSelection = () => {
-  const [selectedInterests, setSelectedInterests] = useState(new Set());
-  const [showAccountCreation, setShowAccountCreation] = useState(false);
-  const [frequency, setFrequency] = useState("");
-  const [contentLength, setContentLength] = useState("");
+const PodcastInterestSelection = () => {
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [frequency, setFrequency] = useState('');
+  const [duration, setDuration] = useState('');
 
   const categories = [
-    { id: "tech", name: "Technology", icon: Laptop },
-    { id: "finance", name: "Finance", icon: LineChart },
-    { id: "wellness", name: "Wellness", icon: Heart },
-    { id: "art", name: "Art & Design", icon: Palette },
-    { id: "music", name: "Music", icon: Music },
-    { id: "literature", name: "Literature", icon: BookOpen },
-    { id: "lifestyle", name: "Lifestyle", icon: Coffee },
-    { id: "culture", name: "Culture", icon: Globe },
-    { id: "photography", name: "Photography", icon: Camera },
-    { id: "food", name: "Food & Cooking", icon: Utensils },
-    { id: "science", name: "Science", icon: Brain },
-    { id: "fitness", name: "Fitness", icon: Dumbbell },
+    { name: 'Technology', icon: <Laptop /> },
+    { name: 'Business', icon: <TrendingUp /> },
+    { name: 'True Crime', icon: <Radio /> },
+    { name: 'Comedy', icon: <Comedy /> },
+    { name: 'Entertainment', icon: <Film /> },
+    { name: 'Music', icon: <Music /> },
+    { name: 'News', icon: <Globe /> },
+    { name: 'Society', icon: <Users /> },
+    { name: 'History', icon: <History /> },
+    { name: 'Gaming', icon: <Gamepad /> },
+    { name: 'Science', icon: <Brain /> },
+    { name: 'Sports', icon: <Dumbbell /> },
+    { name: 'Arts', icon: <Palette /> },
+    { name: 'Education', icon: <BookOpen /> },
+    { name: 'Lifestyle', icon: <Coffee /> },
+    { name: 'Health', icon: <Heart /> }
   ];
 
-  const toggleInterest = (id) => {
-    const newSelected = new Set(selectedInterests);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else if (newSelected.size < 3) {
-      newSelected.add(id);
-    }
-    setSelectedInterests(newSelected);
-  };
-
-  const canContinue =
-    selectedInterests.size === 3 && frequency && contentLength;
-
-  const handleSaveAndContinue = () => {
-    if (canContinue) {
-      setShowAccountCreation(true);
+  const handleInterestSelect = (category) => {
+    if (selectedInterests.includes(category)) {
+      setSelectedInterests(selectedInterests.filter(i => i !== category));
+    } else if (selectedInterests.length < 3) {
+      setSelectedInterests([...selectedInterests, category]);
     }
   };
 
-  if (showAccountCreation) {
-    return (
-      <AccountCreation
-        selectedInterests={Array.from(selectedInterests)} // Pass interests as an array
-        frequency={frequency} // Pass frequency
-        contentLength={contentLength} // Pass content length
-        toggleAuthView={() => setShowAccountCreation(false)}
-      />
-    );
-  }
+  const isSelectionComplete = selectedInterests.length > 0 && frequency && duration;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "#f0f4f8",
-        py: 12,
-        px: 4,
-      }}
-    >
-      <Box maxWidth="lg" mx="auto">
-        {/* Header */}
-        <Box textAlign="center" mb={6}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            What interests you?
+    <Box>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="a" href="/" sx={{ color: 'white', textDecoration: 'none' }}>
+            PodcastDiscover
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Select 3 topics, frequency, and content length to continue
+          <Box sx={{ flexGrow: 1 }} />
+          <Button color="inherit" href="/login">Login</Button>
+        </Toolbar>
+      </AppBar>
+
+      <Box sx={{ p: 4, maxWidth: 1200, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h3" gutterBottom>
+            What do you like to listen to?
+          </Typography>
+          <Typography variant="body1">
+            Select 3 topics, preferred length, and listening frequency to get started
           </Typography>
         </Box>
 
-        {/* Categories Grid */}
-        <Grid container spacing={4} mb={6}>
-          {categories.map(({ id, name, icon: Icon }) => {
-            const isSelected = selectedInterests.has(id);
-            return (
-              <Grid item xs={6} md={4} lg={3} key={id}>
-                <Card
-                  variant="outlined"
-                  onClick={() => toggleInterest(id)}
-                  sx={{
-                    cursor: "pointer",
-                    position: "relative",
-                    border: isSelected ? "2px solid #1976d2" : "2px solid #ccc",
-                    backgroundColor: isSelected ? "#e3f2fd" : "#fff",
-                    "&:hover": {
-                      borderColor: "#1976d2",
-                    },
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                    >
-                      <Icon
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          color: isSelected ? "#1976d2" : "#666",
-                        }}
-                      />
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          fontWeight: isSelected ? "bold" : "normal",
-                          color: isSelected ? "#1976d2" : "#333",
-                        }}
-                      >
-                        {name}
-                      </Typography>
+        <Grid container spacing={4}>
+          {categories.map((category) => (
+            <Grid item xs={6} md={4} lg={3} key={category.name}>
+              <Card 
+                variant="outlined"
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  transform: selectedInterests.includes(category.name) ? 'scale(1.02)' : 'scale(1)',
+                  border: selectedInterests.includes(category.name) ? '2px solid #1976d2' : '1px solid rgba(0, 0, 0, 0.12)',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    boxShadow: 2
+                  }
+                }}
+                onClick={() => handleInterestSelect(category.name)}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box sx={{ mb: 1, color: '#666', '& > svg': { width: 40, height: 40 } }}>
+                      {category.icon}
                     </Box>
-                    {isSelected && (
-                      <IconButton
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          backgroundColor: "#1976d2",
-                          color: "#fff",
-                        }}
-                      >
-                        <Check size={16} />
-                      </IconButton>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
+                    <Typography>{category.name}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
 
-        {/* Customize Your Experience */}
-        <Card variant="outlined" sx={{ mb: 6 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Customize Your Experience
+        <Paper variant="outlined" sx={{ mt: 4, p: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Customize Your Listening Experience
+          </Typography>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body1" gutterBottom>
+              How long do you like your podcasts?
             </Typography>
-
-            {/* Frequency Preference */}
-            <Box mb={4}>
-              <Typography variant="body1" gutterBottom>
-                How often would you like to receive newsletters?
-              </Typography>
-              <Box display="flex" gap={2}>
-                {["daily", "weekly", "monthly"].map((option) => (
-                  <Button
-                    key={option}
-                    onClick={() => setFrequency(option)}
-                    variant={frequency === option ? "contained" : "outlined"}
-                    sx={{
-                      textTransform: "capitalize",
-                      flexGrow: 1,
-                    }}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setDuration('short')}
+                sx={{ 
+                  borderColor: duration === 'short' ? 'primary.main' : 'grey.300',
+                  color: duration === 'short' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Short (&lt;30 min)
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setDuration('medium')}
+                sx={{ 
+                  borderColor: duration === 'medium' ? 'primary.main' : 'grey.300',
+                  color: duration === 'medium' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Medium (30-60 min)
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setDuration('long')}
+                sx={{ 
+                  borderColor: duration === 'long' ? 'primary.main' : 'grey.300',
+                  color: duration === 'long' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Long (&gt;60 min)
+              </Button>
             </Box>
+          </Box>
 
-            {/* Content Length Preference */}
-            <Box>
-              <Typography variant="body1" gutterBottom>
-                Preferred content length
-              </Typography>
-              <Box display="flex" gap={2}>
-                {[
-                  { id: "short", label: "Short Reads" },
-                  { id: "mixed", label: "Mixed" },
-                  { id: "long", label: "In-Depth" },
-                ].map(({ id, label }) => (
-                  <Button
-                    key={id}
-                    onClick={() => setContentLength(id)}
-                    variant={contentLength === id ? "contained" : "outlined"}
-                    sx={{
-                      flexGrow: 1,
-                    }}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </Box>
+          <Box>
+            <Typography variant="body1" gutterBottom>
+              How often do you listen to podcasts?
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setFrequency('daily')}
+                sx={{ 
+                  borderColor: frequency === 'daily' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'daily' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Daily
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setFrequency('weekly')}
+                sx={{ 
+                  borderColor: frequency === 'weekly' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'weekly' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Weekly
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setFrequency('occasional')}
+                sx={{ 
+                  borderColor: frequency === 'occasional' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'occasional' ? 'primary.main' : 'grey.700'
+                }}
+              >
+                Occasionally
+              </Button>
             </Box>
-          </CardContent>
-        </Card>
+          </Box>
+        </Paper>
 
-        {/* Continue Button */}
-        <Box textAlign="center">
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Button
-            disabled={!canContinue}
             variant="contained"
             color="primary"
-            sx={{
-              padding: "12px 24px",
-              fontWeight: "bold",
-              fontSize: "1.25rem",
-            }}
-            onClick={handleSaveAndContinue}
+            disabled={!isSelectionComplete}
+            size="large"
+            startIcon={<Headphones />}
           >
-            {canContinue ? "Save and Continue" : "Complete all selections"}
+            {isSelectionComplete ? "Find My Podcasts" : "Complete all selections"}
           </Button>
         </Box>
       </Box>
@@ -235,4 +225,4 @@ const InterestSelection = () => {
   );
 };
 
-export default InterestSelection;
+export default PodcastInterestSelection;
