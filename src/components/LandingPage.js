@@ -1,13 +1,12 @@
-// src/components/LandingPage.js
-
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Check,
+  Headphones,
   Star,
+  Play,
 } from "lucide-react";
 import {
   Box,
@@ -24,7 +23,7 @@ import {
   Chip,
   Grid,
 } from "@mui/material";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
 
 const FloatingParticle = ({ delay }) => (
   <motion.div
@@ -35,11 +34,7 @@ const FloatingParticle = ({ delay }) => (
       backgroundColor: "white",
       borderRadius: "50%",
     }}
-    initial={{
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: 0,
-    }}
+    initial={{ x: Math.random() * 100, y: Math.random() * 100, opacity: 0 }}
     animate={{
       y: [0, -100, 0],
       x: [0, Math.random() * 50 - 25, 0],
@@ -55,7 +50,7 @@ const FloatingParticle = ({ delay }) => (
 );
 
 const LandingPage = () => {
-  const [currentNewsletter, setCurrentNewsletter] = useState(0);
+  const [currentPodcast, setCurrentPodcast] = useState(0);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [billingCycle, setBillingCycle] = useState("yearly");
   const [isVisible, setIsVisible] = useState({
@@ -84,40 +79,43 @@ const LandingPage = () => {
     return () => observer.disconnect();
   }, []);
 
-  const newsletterShowcase = [
+  const podcastShowcase = [
     {
-      title: "Tech Bytes",
-      description: "Your weekly roundup of the latest in tech.",
+      title: "Tech Talk Daily",
+      description: "Deep dives into the latest tech innovations and trends.",
+      duration: "45 min episodes",
     },
     {
-      title: "Health Tips",
-      description: "Stay informed on health and wellness trends.",
+      title: "True Crime Stories",
+      description: "Investigative journalism meets storytelling.",
+      duration: "60 min episodes",
     },
     {
-      title: "Finance Daily",
-      description: "Daily insights on markets, crypto, and investment.",
+      title: "Mindful Moments",
+      description: "Daily wellness and meditation guidance.",
+      duration: "15 min episodes",
     },
   ];
 
   const testimonials = [
     {
-      text: "I've discovered so many amazing writers I never knew existed! The personalized recommendations have completely transformed my reading habits.",
-      author: "Sarah M.",
-      role: "Tech Enthusiast",
+      text: "Finally, a podcast app that understands my taste! The recommendations are spot-on, and I've discovered so many great shows I would have never found otherwise.",
+      author: "James K.",
+      role: "Daily Commuter",
       avatar: "/api/placeholder/64/64",
       rating: 5,
     },
     {
-      text: "The recommendations are spot-on. I save hours of searching and find exactly what I want to read.",
-      author: "Michael P.",
-      role: "Product Manager",
+      text: "The personalized playlists make my workouts amazing. It's like having a personal podcast curator!",
+      author: "Lisa M.",
+      role: "Fitness Enthusiast",
       avatar: "/api/placeholder/64/64",
       rating: 5,
     },
     {
-      text: "This platform helped me find my niche community. The content quality is outstanding!",
-      author: "Alex K.",
-      role: "Content Creator",
+      text: "I love how it suggests shorter podcasts for my lunch breaks and longer ones for my weekend walks.",
+      author: "David R.",
+      role: "Busy Professional",
       avatar: "/api/placeholder/64/64",
       rating: 5,
     },
@@ -125,39 +123,43 @@ const LandingPage = () => {
 
   const pricingTiers = [
     {
-      name: "Basic Subscription",
+      name: "Free Listener",
       monthlyPrice: 0,
       yearlyPrice: 0,
       features: [
-        "Access to weekly recommendations",
-        "Save newsletters for later",
-        "Limited personalization (3 interest categories)",
+        "Basic podcast recommendations",
+        "Listen to unlimited podcasts",
+        "Create basic playlists",
+        "Basic discovery tools",
       ],
       color: "primary",
       popular: false,
     },
     {
-      name: "Premium Subscription",
-      monthlyPrice: 4,
-      yearlyPrice: 48,
+      name: "Premium Listener",
+      monthlyPrice: 4.99,
+      yearlyPrice: 49.99,
       features: [
-        "Daily and weekly recommendations",
-        "Advanced personalization",
-        "Early access to trending newsletters",
-        "Limited promotional placement",
+        "Advanced AI recommendations",
+        "Offline downloads",
+        "Ad-free listening experience",
+        "Custom playlists and queues",
+        "Early access to new features",
       ],
       color: "secondary",
       popular: true,
     },
     {
-      name: "Gold/Pro Subscription",
-      monthlyPrice: 12,
-      yearlyPrice: 99,
+      name: "Power Listener",
+      monthlyPrice: 9.99,
+      yearlyPrice: 99.99,
       features: [
         "All Premium features",
-        "Gold-tier newsletter placement",
-        "In-depth reader engagement analytics",
-        "Exclusive support and tips",
+        "Exclusive podcast content",
+        "Priority access to live episodes",
+        "Advanced audio quality",
+        "Personal podcast curator",
+        "Cross-platform sync",
       ],
       color: "warning",
       popular: false,
@@ -178,21 +180,13 @@ const LandingPage = () => {
           color: "white",
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.2,
-          }}
-        >
+        <Box sx={{ position: "absolute", inset: 0, opacity: 0.2 }}>
           {[...Array(30)].map((_, i) => (
             <FloatingParticle key={i} delay={i * 0.2} />
           ))}
         </Box>
 
-        <Container
-          sx={{ position: "relative", zIndex: 10, textAlign: "center" }}
-        >
+        <Container sx={{ position: "relative", zIndex: 10, textAlign: "center" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -203,40 +197,39 @@ const LandingPage = () => {
               component="h1"
               sx={{ fontSize: { xs: 48, md: 80 }, mb: 3, color: "white" }}
             >
-              Discover the Best of Substack,
+              Your Perfect Podcast
               <Box component="span" sx={{ mx: 1, color: "white" }}>
-                Tailored Just for You
+                Is Waiting to Be Discovered
               </Box>
             </Typography>
             <Typography variant="h6" sx={{ color: "white", mb: 6 }}>
-              Find your next favorite newsletter among thousands of amazing
-              writers
+              AI-powered recommendations for every moment of your day
             </Typography>
             <Button
-              component={Link} // Use Link for navigation
-              to="/interests" // Navigate to Interest Selection page
+              component={Link}
+              to="/interests"
               variant="contained"
               color="secondary"
               size="large"
-              startIcon={<ArrowRight />}
+              startIcon={<Headphones />}
               sx={{ backgroundColor: "yellow", color: "black" }}
             >
-              Get Started
+              Start Listening
             </Button>
           </motion.div>
         </Container>
       </Box>
 
-      {/* Newsletter Showcase Carousel */}
+      {/* Podcast Showcase Carousel */}
       <Box py={10} bgcolor="grey.100">
         <Container>
           <Typography variant="h4" textAlign="center" mb={6}>
-            Explore Our Newsletter Highlights
+            Featured Podcasts
           </Typography>
           <Box display="flex" justifyContent="center">
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentNewsletter}
+                key={currentPodcast}
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -100 }}
@@ -245,10 +238,13 @@ const LandingPage = () => {
               >
                 <Card sx={{ p: 4, textAlign: "center" }}>
                   <Typography variant="h5" mb={2}>
-                    {newsletterShowcase[currentNewsletter].title}
+                    {podcastShowcase[currentPodcast].title}
                   </Typography>
-                  <Typography variant="body1">
-                    {newsletterShowcase[currentNewsletter].description}
+                  <Typography variant="body1" mb={2}>
+                    {podcastShowcase[currentPodcast].description}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {podcastShowcase[currentPodcast].duration}
                   </Typography>
                 </Card>
               </motion.div>
@@ -258,10 +254,9 @@ const LandingPage = () => {
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <IconButton
               onClick={() =>
-                setCurrentNewsletter(
+                setCurrentPodcast(
                   (prev) =>
-                    (prev - 1 + newsletterShowcase.length) %
-                    newsletterShowcase.length
+                    (prev - 1 + podcastShowcase.length) % podcastShowcase.length
                 )
               }
             >
@@ -269,9 +264,7 @@ const LandingPage = () => {
             </IconButton>
             <IconButton
               onClick={() =>
-                setCurrentNewsletter(
-                  (prev) => (prev + 1) % newsletterShowcase.length
-                )
+                setCurrentPodcast((prev) => (prev + 1) % podcastShowcase.length)
               }
             >
               <ChevronRight />
@@ -289,7 +282,7 @@ const LandingPage = () => {
             transition={{ duration: 0.8 }}
           >
             <Typography variant="h3" textAlign="center" mb={4}>
-              Simple, Transparent Pricing
+              Choose Your Listening Experience
             </Typography>
             <ToggleButtonGroup
               value={billingCycle}
@@ -321,7 +314,7 @@ const LandingPage = () => {
                             key={idx}
                             label={feature}
                             variant="outlined"
-                            sx={{ mr: 1 }}
+                            sx={{ mr: 1, mb: 1 }}
                           />
                         ))}
                       </Box>
@@ -333,8 +326,9 @@ const LandingPage = () => {
                         variant="contained"
                         color={tier.color}
                         fullWidth
+                        startIcon={<Play />}
                       >
-                        {tier.popular ? "Popular Choice" : "Choose Plan"}
+                        {tier.popular ? "Most Popular" : "Get Started"}
                       </Button>
                     </CardActions>
                   </Card>
@@ -354,7 +348,7 @@ const LandingPage = () => {
             transition={{ duration: 0.8 }}
           >
             <Typography variant="h3" textAlign="center" mb={4}>
-              What Our Users Are Saying
+              What Our Listeners Say
             </Typography>
             <Box display="flex" justifyContent="center">
               <AnimatePresence mode="wait">
