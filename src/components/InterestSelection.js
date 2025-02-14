@@ -27,12 +27,11 @@ import {
   Radio,
   Headphones,
   Film,
-  Award,
+  Theatre,
   Podcast,
   Gamepad,
   Users,
-  History,
-  Comedy
+  Clock
 } from 'lucide-react';
 
 const PodcastInterestSelection = () => {
@@ -44,12 +43,12 @@ const PodcastInterestSelection = () => {
     { name: 'Technology', icon: <Laptop /> },
     { name: 'Business', icon: <TrendingUp /> },
     { name: 'True Crime', icon: <Radio /> },
-    { name: 'Comedy', icon: <Comedy /> },
+    { name: 'Comedy', icon: <Theatre /> },
     { name: 'Entertainment', icon: <Film /> },
     { name: 'Music', icon: <Music /> },
     { name: 'News', icon: <Globe /> },
     { name: 'Society', icon: <Users /> },
-    { name: 'History', icon: <History /> },
+    { name: 'History', icon: <Clock /> },
     { name: 'Gaming', icon: <Gamepad /> },
     { name: 'Science', icon: <Brain /> },
     { name: 'Sports', icon: <Dumbbell /> },
