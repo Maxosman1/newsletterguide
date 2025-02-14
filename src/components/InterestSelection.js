@@ -11,28 +11,23 @@ import {
   Paper
 } from '@mui/material';
 import {
-  Mic,
   Laptop,
   TrendingUp,
-  Heart,
-  Palette,
-  Music,
-  BookOpen,
-  Coffee,
-  Globe,
-  Camera,
-  Utensils,
-  Brain,
-  Dumbbell,
   Radio,
-  Headphones,
-  Film,
-  Theatre,
-  Podcast,
-  Gamepad,
-  Users,
-  Clock
-} from 'lucide-react';
+  TheaterComedy,
+  Movie,
+  MusicNote,
+  Public,
+  Groups,
+  History,
+  SportsEsports,
+  Psychology,
+  FitnessCenter,
+  Palette,
+  School,
+  Coffee,
+  Favorite
+} from '@mui/icons-material';
 
 const PodcastInterestSelection = () => {
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -43,19 +38,19 @@ const PodcastInterestSelection = () => {
     { name: 'Technology', icon: <Laptop /> },
     { name: 'Business', icon: <TrendingUp /> },
     { name: 'True Crime', icon: <Radio /> },
-    { name: 'Comedy', icon: <Theatre /> },
-    { name: 'Entertainment', icon: <Film /> },
-    { name: 'Music', icon: <Music /> },
-    { name: 'News', icon: <Globe /> },
-    { name: 'Society', icon: <Users /> },
-    { name: 'History', icon: <Clock /> },
-    { name: 'Gaming', icon: <Gamepad /> },
-    { name: 'Science', icon: <Brain /> },
-    { name: 'Sports', icon: <Dumbbell /> },
+    { name: 'Comedy', icon: <TheaterComedy /> },
+    { name: 'Entertainment', icon: <Movie /> },
+    { name: 'Music', icon: <MusicNote /> },
+    { name: 'News', icon: <Public /> },
+    { name: 'Society', icon: <Groups /> },
+    { name: 'History', icon: <History /> },
+    { name: 'Gaming', icon: <SportsEsports /> },
+    { name: 'Science', icon: <Psychology /> },
+    { name: 'Sports', icon: <FitnessCenter /> },
     { name: 'Arts', icon: <Palette /> },
-    { name: 'Education', icon: <BookOpen /> },
+    { name: 'Education', icon: <School /> },
     { name: 'Lifestyle', icon: <Coffee /> },
-    { name: 'Health', icon: <Heart /> }
+    { name: 'Health', icon: <Favorite /> }
   ];
 
   const handleInterestSelect = (category) => {
