@@ -9,27 +9,26 @@ import {
   AppBar,
   Toolbar,
   Paper
-} from '@/components/ui/card';
-
+} from '@mui/material';
 import {
   Laptop,
   TrendingUp,
   Radio,
-  Theater,
-  Film,
-  Music,
-  Globe,
-  Users,
-  History as HistoryIcon,
-  Gamepad2,
-  Brain,
-  Dumbbell,
+  TheaterComedy,
+  Movie,
+  MusicNote,
+  Public,
+  Groups,
+  History,
+  SportsEsports,
+  Psychology,
+  FitnessCenter,
   Palette,
-  GraduationCap,
+  School,
   Coffee,
-  Heart,
+  Favorite,
   Headphones
-} from 'lucide-react';
+} from '@mui/icons-material';
 
 const PodcastInterestSelection = () => {
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -40,19 +39,19 @@ const PodcastInterestSelection = () => {
     { name: 'Technology', icon: <Laptop /> },
     { name: 'Business', icon: <TrendingUp /> },
     { name: 'True Crime', icon: <Radio /> },
-    { name: 'Comedy', icon: <Theater /> },
-    { name: 'Entertainment', icon: <Film /> },
-    { name: 'Music', icon: <Music /> },
-    { name: 'News', icon: <Globe /> },
-    { name: 'Society', icon: <Users /> },
-    { name: 'History', icon: <HistoryIcon /> },
-    { name: 'Gaming', icon: <Gamepad2 /> },
-    { name: 'Science', icon: <Brain /> },
-    { name: 'Sports', icon: <Dumbbell /> },
+    { name: 'Comedy', icon: <TheaterComedy /> },
+    { name: 'Entertainment', icon: <Movie /> },
+    { name: 'Music', icon: <MusicNote /> },
+    { name: 'News', icon: <Public /> },
+    { name: 'Society', icon: <Groups /> },
+    { name: 'History', icon: <History /> },
+    { name: 'Gaming', icon: <SportsEsports /> },
+    { name: 'Science', icon: <Psychology /> },
+    { name: 'Sports', icon: <FitnessCenter /> },
     { name: 'Arts', icon: <Palette /> },
-    { name: 'Education', icon: <GraduationCap /> },
+    { name: 'Education', icon: <School /> },
     { name: 'Lifestyle', icon: <Coffee /> },
-    { name: 'Health', icon: <Heart /> }
+    { name: 'Health', icon: <Favorite /> }
   ];
 
   const handleInterestSelect = (category) => {
@@ -66,120 +65,151 @@ const PodcastInterestSelection = () => {
   const isSelectionComplete = selectedInterests.length > 0 && frequency && duration;
 
   return (
-    <div className="w-full">
-      <div className="bg-primary p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Typography variant="h6" className="text-white no-underline">
+    <Box>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="a" href="/" sx={{ color: 'white', textDecoration: 'none' }}>
             PodcastDiscover
           </Typography>
-          <Button variant="ghost" className="text-white">Login</Button>
-        </div>
-      </div>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button color="inherit" href="/login">Login</Button>
+        </Toolbar>
+      </AppBar>
 
-      <div className="p-8 max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">
+      <Box sx={{ p: 4, maxWidth: 1200, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h3" gutterBottom>
             What do you like to listen to?
-          </h1>
-          <p className="text-gray-600">
+          </Typography>
+          <Typography variant="body1">
             Select 3 topics, preferred length, and listening frequency to get started
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Grid container spacing={4}>
           {categories.map((category) => (
-            <Card 
-              key={category.name}
-              className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-                selectedInterests.includes(category.name) ? 'border-2 border-primary' : ''
-              }`}
-              onClick={() => handleInterestSelect(category.name)}
-            >
-              <CardContent className="flex flex-col items-center p-4">
-                <div className="mb-2 text-gray-600">
-                  {category.icon}
-                </div>
-                <Typography>{category.name}</Typography>
-              </CardContent>
-            </Card>
+            <Grid item xs={6} md={4} lg={3} key={category.name}>
+              <Card 
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  transform: selectedInterests.includes(category.name) ? 'scale(1.02)' : 'scale(1)',
+                  border: selectedInterests.includes(category.name) ? '2px solid #1976d2' : '1px solid rgba(0, 0, 0, 0.12)',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    boxShadow: 2
+                  }
+                }}
+                onClick={() => handleInterestSelect(category.name)}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box sx={{ mb: 1, color: '#666', '& > svg': { width: 40, height: 40 } }}>
+                      {category.icon}
+                    </Box>
+                    <Typography>{category.name}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </div>
+        </Grid>
 
-        <Card className="mt-8 p-6">
-          <Typography variant="h6" className="mb-4">
+        <Paper sx={{ mt: 4, p: 3 }}>
+          <Typography variant="h6" gutterBottom>
             Customize Your Listening Experience
           </Typography>
           
-          <div className="mb-6">
-            <Typography className="mb-2">
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body1" gutterBottom>
               How long do you like your podcasts?
             </Typography>
-            <div className="flex gap-4">
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setDuration('short')}
-                className={duration === 'short' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: duration === 'short' ? 'primary.main' : 'grey.300',
+                  color: duration === 'short' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Short (&lt;30 min)
               </Button>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setDuration('medium')}
-                className={duration === 'medium' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: duration === 'medium' ? 'primary.main' : 'grey.300',
+                  color: duration === 'medium' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Medium (30-60 min)
               </Button>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setDuration('long')}
-                className={duration === 'long' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: duration === 'long' ? 'primary.main' : 'grey.300',
+                  color: duration === 'long' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Long (&gt;60 min)
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
-          <div>
-            <Typography className="mb-2">
+          <Box>
+            <Typography variant="body1" gutterBottom>
               How often do you listen to podcasts?
             </Typography>
-            <div className="flex gap-4">
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setFrequency('daily')}
-                className={frequency === 'daily' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: frequency === 'daily' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'daily' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Daily
               </Button>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setFrequency('weekly')}
-                className={frequency === 'weekly' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: frequency === 'weekly' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'weekly' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Weekly
               </Button>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setFrequency('occasional')}
-                className={frequency === 'occasional' ? 'bg-primary text-white' : ''}
+                sx={{ 
+                  borderColor: frequency === 'occasional' ? 'primary.main' : 'grey.300',
+                  color: frequency === 'occasional' ? 'primary.main' : 'grey.700'
+                }}
               >
                 Occasionally
               </Button>
-            </div>
-          </div>
-        </Card>
+            </Box>
+          </Box>
+        </Paper>
 
-        <div className="mt-8 text-center">
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Button
+            variant="contained"
+            color="primary"
             disabled={!isSelectionComplete}
-            className="text-lg"
+            size="large"
+            startIcon={<Headphones />}
           >
-            <Headphones className="mr-2" />
             {isSelectionComplete ? "Find My Podcasts" : "Complete all selections"}
           </Button>
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
