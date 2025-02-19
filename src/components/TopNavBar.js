@@ -46,13 +46,13 @@ const TopNavBar = ({ isAuthenticated, setIsAuthenticated }) => {
           to="/"
           style={{ color: "white", textDecoration: "none" }}
         >
-          MyNewsLetterGuide
+          Curatrs
         </Typography>
         <div style={{ flexGrow: 1 }} />
 
         {location.pathname === "/" ? (
           <Button color="inherit" component={Link} to="/submit-substack">
-            Submit your Substack
+           
           </Button>
         ) : isAuthenticated ? (
           <>
