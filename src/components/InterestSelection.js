@@ -66,16 +66,6 @@ const PodcastInterestSelection = () => {
 
   return (
     <Box>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="a" href="/" sx={{ color: 'white', textDecoration: 'none' }}>
-            PodcastDiscover
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Button color="inherit" href="/login">Login</Button>
-        </Toolbar>
-      </AppBar>
-
       <Box sx={{ p: 4, maxWidth: 1200, mx: 'auto' }}>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Typography variant="h3" gutterBottom>
